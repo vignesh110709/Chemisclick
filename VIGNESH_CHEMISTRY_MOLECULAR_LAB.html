@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>Chemistry Molecular Laboratory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Design tokens: exactly three brand colours + white / light grey for text ===== */
+:root{
+ color-scheme:dark;
+ --black:#050505;      /* Jet Black */
+ --amethyst:#3B0A6B;   /* Royal Amethyst */
+ --cyan:#00E5FF;       /* Electric Cyan */
+ --white:#ffffff;
+ --grey:#cfcbd9;
+ --grey-2:#a59fb6;
+ --line:rgba(0,229,255,.16);
+ --line-hi:rgba(0,229,255,.5);
+ --glow:0 0 22px rgba(0,229,255,.38);
+ --r:18px;
+ --nav-h:80px;
+ --mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+ --m:var(--grey-2);--a:var(--cyan);   /* legacy variable names kept for compatibility */
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--white);font:15px/1.6 Manrope,system-ui,sans-serif;background:var(--black);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background:
+  radial-gradient(900px 520px at 88% -8%,rgba(59,10,107,.8),transparent 65%),
+  radial-gradient(760px 520px at -8% 55%,rgba(59,10,107,.5),transparent 65%),
+  linear-gradient(rgba(0,229,255,.035) 1px,transparent 1px) 0 0/48px 48px,
+  linear-gradient(90deg,rgba(0,229,255,.035) 1px,transparent 1px) 0 0/48px 48px,
+  var(--black)}
+.ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+::selection{background:var(--cyan);color:var(--black)}
+
+/* ===== Header / navigation ===== */
+.nav{position:sticky;top:0;z-index:50;display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand links chip";align-items:center;gap:8px 28px;padding:12px clamp(16px,3vw,32px);background:rgba(5,5,5,.8);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--line)}
+.nav::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.55;pointer-events:none}
+.brand{grid-area:brand;display:flex;align-items:center;gap:14px;color:inherit;text-decoration:none;min-width:0}
+.logo{width:48px;height:48px;flex:none;filter:drop-shadow(0 0 10px rgba(0,229,255,.45))}
+.orbits{transform-origin:24px 24px;animation:rot 28s linear infinite}
+.brand h1{margin:0;font:700 clamp(15px,1.7vw,21px)/1.15 "Chakra Petch",sans-serif;letter-spacing:.09em;color:var(--white)}
+.brand p{margin:3px 0 0;font-size:12px;color:var(--grey);letter-spacing:.02em}
+.links{grid-area:links;display:flex;gap:4px;justify-content:center}
+.links a{position:relative;padding:10px 14px;color:var(--grey);text-decoration:none;font-weight:600;font-size:14px;border-radius:10px;white-space:nowrap;transition:color .2s}
+.links a:hover{color:var(--white)}
+.links a.active{color:var(--cyan)}
+.links a::after{content:"";position:absolute;left:14px;right:14px;bottom:2px;height:2px;border-radius:2px;background:var(--cyan);box-shadow:0 0 10px var(--cyan);transform:scaleX(0);transition:transform .25s}
+.links a.active::after{transform:scaleX(1)}
+.chip{grid-area:chip;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(59,10,107,.5)}
+.chip svg{width:34px;height:37px;flex:none}
+.chip b{display:block;font:600 14px/1.15 "Chakra Petch",sans-serif;letter-spacing:.07em}
+.chip small{display:block;font:12px var(--mono);color:var(--cyan);letter-spacing:.05em}
+.mono-t{font:700 14px "Chakra Petch",sans-serif;fill:var(--cyan)}
+
+/* ===== Layout ===== */
+.shell{max-width:1320px;margin:0 auto;padding:22px clamp(14px,2.4vw,24px) 36px;display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+.side{display:grid;gap:16px;align-content:start;grid-auto-rows:max-content;min-width:0}
+.content{display:grid;gap:20px;min-width:0;align-content:start}
+.grid2{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+#extra>*+*{margin-top:20px}
+#analysis,#lab,#identity,#properties{scroll-margin-top:calc(var(--nav-h) + 16px)}
+@media(min-width:760px){.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(min-width:1000px){
+ .shell{grid-template-columns:380px minmax(0,1fr)}
+ .side{position:sticky;top:calc(var(--nav-h) + 16px);max-height:calc(100vh - var(--nav-h) - 32px);overflow-y:auto;padding-right:6px;scrollbar-width:thin;scrollbar-color:rgba(0,229,255,.5) transparent}
+}
+@media(max-width:1180px){
+ .nav{grid-template-columns:1fr auto;grid-template-areas:"brand chip" "links links"}
+ .links{justify-content:flex-start;overflow-x:auto;scrollbar-width:none}
+}
+@media(max-width:700px){.chip{display:none}.nav{grid-template-columns:1fr}.nav{grid-template-areas:"brand" "links"}}
+
+/* ===== Cards (glass panels) ===== */
+.card{position:relative;min-width:0;padding:20px;border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(155deg,rgba(59,10,107,.78),rgba(59,10,107,.32) 62%,rgba(5,5,5,.55));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:border-color .25s,box-shadow .25s,transform .25s}
+.card:hover{border-color:var(--line-hi);box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 26px rgba(0,229,255,.12)}
+.grid2>.card:hover,#extra .card:hover{transform:translateY(-2px)}
+h2{display:flex;align-items:center;gap:10px;margin:0 0 14px;font:600 17px/1.2 "Chakra Petch",sans-serif;letter-spacing:.02em;color:var(--white)}
+h2 .ic{color:var(--cyan);filter:drop-shadow(0 0 6px rgba(0,229,255,.65))}
+.badge{margin-left:auto;flex:none;padding:2px 10px;border:1px solid var(--line);border-radius:999px;font:600 12px Manrope,sans-serif;color:var(--cyan)}
+.help{margin:10px 0 0;font-size:12.5px;color:var(--grey)}
+
+/* ===== Student profile ===== */
+.profile{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;overflow:hidden;border-color:var(--line-hi);background:linear-gradient(135deg,rgba(59,10,107,.97),rgba(59,10,107,.5) 70%,rgba(5,5,5,.45))}
+.profile::before{content:"";position:absolute;left:0;top:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),transparent 75%)}
+.profile .wm{position:absolute;right:-20px;bottom:-26px;width:130px;height:130px;color:var(--cyan);opacity:.1;stroke-width:1.2}
+.hexmono{width:68px;height:74px;filter:drop-shadow(0 0 10px rgba(0,229,255,.5))}
+.who{position:relative;min-width:0}
+.who small{display:block;font-size:12px;color:var(--grey);letter-spacing:.03em}
+.who .name{margin:1px 0 9px;font:700 28px/1.05 "Cormorant Garamond",serif;letter-spacing:.05em;color:var(--white)}
+.who .reg{font:600 14px var(--mono);color:var(--cyan);letter-spacing:.07em;text-shadow:0 0 12px rgba(0,229,255,.55);word-break:break-all}
+
+/* ===== Inputs & buttons ===== */
+input,button{font:inherit}
+input{width:100%;padding:12px 14px;border:1px solid rgba(0,229,255,.24);border-radius:12px;background:rgba(5,5,5,.72);color:var(--white);transition:border-color .2s,box-shadow .2s}
+input::placeholder{color:var(--grey-2)}
+input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.16),0 0 18px rgba(0,229,255,.25)}
+#smi,#key,.mono{font-family:var(--mono);font-size:14px}
+.field{position:relative}
+.field .ic{position:absolute;left:13px;top:50%;margin-top:-9px;color:var(--cyan);pointer-events:none}
+.field input{padding-left:42px}
+button{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border:1px solid rgba(0,229,255,.3);border-radius:12px;background:rgba(5,5,5,.6);color:var(--white);cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s,background .2s,color .2s}
+button:hover{border-color:var(--cyan);box-shadow:0 0 16px rgba(0,229,255,.3);transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+button:focus-visible,a:focus-visible,.item:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button.on,button.go{background:var(--cyan);border-color:var(--cyan);color:var(--black);font-weight:700;box-shadow:0 0 20px rgba(0,229,255,.4)}
+button.go:hover,button.on:hover{box-shadow:0 0 30px rgba(0,229,255,.7)}
+button.block{width:100%;margin-top:12px}
+button.loading::before{content:"";width:14px;height:14px;border-radius:50%;border:2px solid rgba(5,5,5,.3);border-top-color:var(--black);animation:rot .7s linear infinite}
+a{color:var(--cyan);text-underline-offset:3px}
+
+/* ===== Status / errors ===== */
+.status{min-height:1.4em;margin-top:10px;font-size:13px;color:var(--grey)}
+.err{margin-top:10px;font-size:13px;color:var(--white)}
+.err:not(:empty){display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line-hi);border-radius:10px;background:rgba(5,5,5,.55)}
+.err:not(:empty)::before{content:"!";flex:none;width:18px;height:18px;border-radius:50%;background:var(--cyan);color:var(--black);font:700 12px/18px Manrope,sans-serif;text-align:center}
+#toast{position:fixed;left:50%;bottom:24px;z-index:100;max-width:min(92vw,560px);padding:12px 18px;border:1px solid var(--cyan);border-radius:14px;background:rgba(59,10,107,.97);box-shadow:var(--glow);color:var(--white);font-size:14px;opacity:0;transform:translate(-50%,20px);pointer-events:none;transition:opacity .25s,transform .25s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ===== Compound list ===== */
+.list{max-height:260px;overflow:auto;margin:0 -6px;padding:0 6px;scrollbar-width:thin;scrollbar-color:rgba(0,229,255,.5) transparent}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:4px;border:1px solid transparent;border-radius:12px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+.item b{font-weight:600}
+.item span{font:12px var(--mono);color:var(--grey)}
+.item:hover{background:rgba(0,229,255,.07);border-color:var(--line);transform:translateX(2px)}
+.item.sel{background:linear-gradient(90deg,rgba(0,229,255,.2),rgba(0,229,255,.04));border-color:var(--line-hi);box-shadow:inset 3px 0 0 var(--cyan)}
+
+/* ===== 3D laboratory ===== */
+.lab{padding:0;overflow:hidden;border-color:var(--line-hi);background:linear-gradient(160deg,rgba(59,10,107,.98),rgba(59,10,107,.62) 65%,rgba(59,10,107,.85));box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 40px rgba(59,10,107,.6)}
+.lab-head{padding:18px 20px 14px}
+.lab-head h2{margin:0;font-size:19px}
+.stage{position:relative;margin:0 14px;border:1px solid rgba(0,229,255,.4);border-radius:16px;background:var(--black);box-shadow:inset 0 0 60px rgba(59,10,107,.5),0 0 30px rgba(0,229,255,.16)}
+#v{position:relative;width:100%;height:clamp(360px,62vh,620px);border-radius:15px;overflow:hidden;background:var(--black)}
+.stage::before,.stage::after{content:"";position:absolute;z-index:3;width:26px;height:26px;border:2px solid var(--cyan);pointer-events:none;filter:drop-shadow(0 0 6px var(--cyan))}
+.stage::before{top:10px;left:10px;border-right:0;border-bottom:0;border-top-left-radius:10px}
+.stage::after{bottom:10px;right:10px;border-left:0;border-top:0;border-bottom-right-radius:10px}
+.vig{position:absolute;inset:0;z-index:2;border-radius:15px;pointer-events:none;background:radial-gradient(ellipse at center,transparent 58%,rgba(59,10,107,.4))}
+.hud{position:absolute;z-index:3;left:50px;top:12px;display:flex;align-items:baseline;gap:10px;max-width:calc(100% - 70px);padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(59,10,107,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:none}
+.hud b{font:600 15px "Chakra Petch",sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud span{font:600 13px var(--mono);color:var(--cyan);white-space:nowrap}
+.hud sub{font-size:.72em}
+.hint{position:absolute;z-index:3;left:16px;bottom:12px;max-width:calc(100% - 70px);font-size:12px;color:var(--grey);pointer-events:none}
+.scan{position:absolute;inset:0;z-index:4;display:none;place-items:center;border-radius:15px;overflow:hidden;background:rgba(5,5,5,.6);pointer-events:none}
+.stage.busy .scan{display:grid}
+.scan::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);box-shadow:0 0 18px var(--cyan);animation:sweep 1.5s ease-in-out infinite alternate}
+.scan span{display:flex;align-items:center;gap:12px;font:600 14px "Chakra Petch",sans-serif;letter-spacing:.05em}
+.ring{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,229,255,.25);border-top-color:var(--cyan);animation:rot .8s linear infinite}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 18px;padding:16px 14px 20px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(5,5,5,.55)}
+.seg button{padding:8px 13px;border:0;border-radius:10px;background:transparent;box-shadow:none;font-size:14px}
+.seg button:hover{color:var(--cyan);background:rgba(0,229,255,.08);box-shadow:none;transform:none}
+.seg button.on{background:var(--cyan);color:var(--black);box-shadow:0 0 18px rgba(0,229,255,.5)}
+
+/* ===== Tables / data ===== */
+table{width:100%;border-collapse:collapse}
+td{padding:9px 8px;border-bottom:1px solid rgba(0,229,255,.1);vertical-align:top}
+td:first-child{width:44%;color:var(--grey)}
+td:last-child{color:var(--white);font-weight:600;word-break:break-word}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:rgba(0,229,255,.05)}
+#img{width:100%;max-width:300px;margin-top:14px;padding:6px;border:1px solid var(--line-hi);border-radius:14px;background:#fff;box-shadow:var(--glow)}
+#csout{margin-top:12px;font-size:13px;color:var(--grey)}
+#csout.loading::before{content:"";display:inline-block;width:12px;height:12px;margin-right:8px;border-radius:50%;border:2px solid rgba(0,229,255,.3);border-top-color:var(--cyan);vertical-align:-2px;animation:rot .8s linear infinite}
+.ext{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.ext a{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line-hi);border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;transition:box-shadow .2s,background .2s}
+.ext a:hover{background:rgba(0,229,255,.1);box-shadow:var(--glow)}
+.ext .ic{width:15px;height:15px}
+#desc{margin:0;max-width:78ch;color:var(--grey);line-height:1.75}
+.bar{display:grid;grid-template-columns:minmax(110px,150px) 1fr;gap:12px;align-items:center;margin:12px 0;font-size:13px}
+.bar b{font-weight:500;color:var(--grey)}
+.bar i{display:block;height:10px;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:rgba(5,5,5,.7)}
+.bar u{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--amethyst),var(--cyan));box-shadow:0 0 12px rgba(0,229,255,.6);transform-origin:left;animation:grow .8s ease-out both}
+.ghost{display:none;align-items:center;gap:16px;border-style:dashed;color:var(--grey)}
+.ghost .ic{width:30px;height:30px;color:var(--cyan)}
+.ghost p{margin:0}
+#extra[style*="none"]+.ghost{display:flex}
+
+/* ===== Footer ===== */
+.foot{border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(59,10,107,.35),rgba(5,5,5,.9));position:relative}
+.foot::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.55}
+.foot-in{max-width:1320px;margin:0 auto;padding:28px clamp(14px,2.4vw,24px);display:grid;gap:24px;grid-template-columns:minmax(0,1fr);align-items:center}
+@media(min-width:800px){.foot-in{grid-template-columns:minmax(0,1.4fr) auto}}
+.foot-brand{display:flex;gap:14px;align-items:flex-start}
+.foot-brand .ic{width:32px;height:32px;color:var(--cyan);filter:drop-shadow(0 0 8px rgba(0,229,255,.6))}
+.foot-brand b{display:block;font:700 15px "Chakra Petch",sans-serif;letter-spacing:.09em}
+.foot-brand p{margin:6px 0 0;max-width:62ch;font-size:12.5px;color:var(--grey)}
+.foot-student{padding:14px 20px;border:1px solid var(--line-hi);border-radius:var(--r);background:rgba(59,10,107,.55);text-align:left}
+.foot-student small{display:block;font-size:12px;color:var(--grey)}
+.foot-student .name{font:700 24px/1.1 "Cormorant Garamond",serif;letter-spacing:.05em}
+.foot-student .reg{margin-top:4px;font:600 13px var(--mono);color:var(--cyan);letter-spacing:.07em}
+
+/* ===== Scrollbars ===== */
+.side::-webkit-scrollbar,.list::-webkit-scrollbar{width:7px}
+.side::-webkit-scrollbar-thumb,.list::-webkit-scrollbar-thumb{background:rgba(0,229,255,.45);border-radius:6px}
+
+/* ===== Small screens ===== */
+@media(max-width:560px){
+ .card{padding:16px}.stage{margin:0 10px}.lab-head{padding:16px 16px 12px}.toolbar{padding:14px 10px 16px}
+ .seg button{padding:8px 10px;font-size:13px}.who .name{font-size:24px}
+ .bar{grid-template-columns:1fr}
+}
+
+/* ===== Motion ===== */
+@keyframes rot{to{transform:rotate(360deg)}}
+@keyframes sweep{to{top:calc(100% - 2px)}}
+@keyframes grow{from{transform:scaleX(0)}}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style></head><body>
+
+<!-- Icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></symbol>
+<symbol id="i-code" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></symbol>
+<symbol id="i-atom" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.8"/><ellipse cx="12" cy="12" rx="9.5" ry="4"/><ellipse cx="12" cy="12" rx="9.5" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9.5" ry="4" transform="rotate(120 12 12)"/></symbol>
+<symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="2"/><path d="M6 16.5c.8-1.8 4.2-1.8 6 0M14.5 10h3.5M14.5 14h3.5"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path d="M9.5 3h5M10.5 3v6L5 19a1.5 1.5 0 001.3 2.2h11.4A1.5 1.5 0 0019 19l-5.5-10V3"/><path d="M7.8 15h8.4"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></symbol>
+<symbol id="i-text" viewBox="0 0 24 24"><path d="M5 6h14M5 11h14M5 16h9"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M3.5 9.5h17M9.5 3.5v17"/></symbol>
+<symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/></symbol>
+<symbol id="i-bs" viewBox="0 0 24 24"><circle cx="6.5" cy="17" r="3"/><circle cx="17.5" cy="7" r="3"/><path d="M9 15l6-6"/></symbol>
+<symbol id="i-st" viewBox="0 0 24 24"><path d="M4 18l6-6 4 3 6-9"/></symbol>
+<symbol id="i-sp" viewBox="0 0 24 24"><circle cx="9" cy="14" r="6"/><circle cx="16" cy="9" r="5"/></symbol>
+<symbol id="i-ln" viewBox="0 0 24 24"><path d="M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8"/></symbol>
+<symbol id="i-h" viewBox="0 0 24 24"><path d="M7 5v14M17 5v14M7 12h10"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.2"/></symbol>
+<symbol id="i-spin" viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.6-5.9"/><path d="M20 4v5h-5"/></symbol>
+<symbol id="i-surf" viewBox="0 0 24 24"><path d="M12 3c4 3.5 7 6.3 7 10a7 7 0 01-14 0c0-3.7 3-6.5 7-10z"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+<symbol id="i-ring" viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/></symbol>
+</defs></svg>
+
+<!-- ===== Header / navigation ===== -->
+<header class="nav" id="top">
+ <a class="brand" href="#top" aria-label="Chemistry Molecular Laboratory">
+  <svg class="logo" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+   <defs><linearGradient id="lgf" x1="6" y1="3" x2="42" y2="45" gradientUnits="userSpaceOnUse"><stop stop-color="#3B0A6B"/><stop offset="1" stop-color="#050505"/></linearGradient></defs>
+   <path d="M24 2.5l18 10.4v22.2L24 45.5 6 35.1V12.9z" fill="url(#lgf)" stroke="#00E5FF" stroke-width="1.6" stroke-linejoin="round"/>
+   <g class="orbits" stroke="#00E5FF" stroke-width="1.2" stroke-opacity=".85">
+    <ellipse cx="24" cy="24" rx="14" ry="5.5"/>
+    <ellipse cx="24" cy="24" rx="14" ry="5.5" transform="rotate(60 24 24)"/>
+    <ellipse cx="24" cy="24" rx="14" ry="5.5" transform="rotate(120 24 24)"/>
+   </g>
+   <circle cx="24" cy="24" r="3.4" fill="#00E5FF"/>
+   <circle cx="38" cy="24" r="1.9" fill="#fff"/>
+  </svg>
+  <div><h1>CHEMISTRY MOLECULAR LABORATORY</h1><p>Interactive 3D Molecular Visualization &amp; Chemical Analysis</p></div>
+ </a>
+ <nav class="links" id="nav" aria-label="Sections">
+  <a href="#lab" class="active">Laboratory</a><a href="#identity">Identity card</a><a href="#properties">Properties</a><a href="#analysis">Analysis</a>
+ </nav>
+ <div class="chip" aria-label="Student">
+  <svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 1.5l16.5 9.5v22L20 42.5 3.5 33V11z" fill="#3B0A6B" stroke="#00E5FF" stroke-width="1.5"/><text class="mono-t" x="20" y="27" text-anchor="middle">VN</text></svg>
+  <div><b>VIGNESH.N.S.</b><small>RE2611026050290</small></div>
+ </div>
+</header>
+
+<div class="shell">
+<!-- ===== Sidebar ===== -->
+<aside class="side" aria-label="Search and input">
+
+ <section class="card profile" aria-label="Student profile">
+  <svg class="ic wm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-atom"/></svg>
+  <svg class="hexmono" viewBox="0 0 40 44" aria-hidden="true"><path d="M20 1.5l16.5 9.5v22L20 42.5 3.5 33V11z" fill="#3B0A6B" stroke="#00E5FF" stroke-width="1.5"/><text x="20" y="27.5" text-anchor="middle" style="font:700 15px 'Chakra Petch',sans-serif" fill="#00E5FF">VN</text></svg>
+  <div class="who">
+   <small>Student</small>
+   <div class="name">VIGNESH.N.S.</div>
+   <small>Registration number</small>
+   <div class="reg">RE2611026050290</div>
+  </div>
+ </section>
+
+ <section class="card" id="search">
+  <h2><svg class="ic"><use href="#i-search"/></svg>Compound search</h2>
+  <div class="field"><svg class="ic"><use href="#i-search"/></svg><input id="q" placeholder="Any molecule or element: aspirin, gold, Fe, 50-78-2…" autocomplete="off" spellcheck="false"></div>
+  <button class="go block" id="go">Search PubChem + ChemSpider</button>
+  <div class="status" id="st" role="status" aria-live="polite"></div>
+ </section>
+
+ <section class="card">
+  <h2><svg class="ic"><use href="#i-list"/></svg>Chemical compound list<span class="badge" id="count"></span></h2>
+  <div class="list" id="list" role="listbox" aria-label="Compound list"></div>
+ </section>
+
+ <section class="card">
+  <h2><svg class="ic"><use href="#i-key"/></svg>ChemSpider API key (optional)</h2>
+  <input id="key" placeholder="Free key from developer.rsc.org" spellcheck="false" autocomplete="off">
+  <p class="help">Add a key to pull the ChemSpider record into the identity card.</p>
+ </section>
+
+ <section class="card">
+  <h2><svg class="ic"><use href="#i-code"/></svg>Custom SMILES</h2>
+  <input id="smi" value="CCO" spellcheck="false" autocomplete="off">
+  <button class="go block" id="run">Analyze molecule</button>
+  <div class="err" id="err" role="alert"></div>
+ </section>
+</aside>
+
+<!-- ===== Main content ===== -->
+<main class="content">
+
+ <section class="card lab" id="lab">
+  <div class="lab-head"><h2><svg class="ic"><use href="#i-atom"/></svg>3D Molecule Laboratory</h2></div>
+  <div class="stage" id="stage">
+   <div id="v"></div>
+   <div class="vig"></div>
+   <div class="hud"><b id="hudName">Molecule</b><span id="hudFormula"></span></div>
+   <div class="hint">Drag to rotate, scroll or pinch to zoom</div>
+   <div class="scan"><span><i class="ring"></i>Fetching molecule from PubChem</span></div>
+  </div>
+  <div class="toolbar">
+   <div class="seg" id="styles" role="group" aria-label="Display style">
+    <button data-s="bs" class="on"><svg class="ic"><use href="#i-bs"/></svg>Ball &amp; stick</button>
+    <button data-s="st"><svg class="ic"><use href="#i-st"/></svg>Stick</button>
+    <button data-s="sp"><svg class="ic"><use href="#i-sp"/></svg>Space filling</button>
+    <button data-s="ln"><svg class="ic"><use href="#i-ln"/></svg>Wireframe</button>
+   </div>
+   <div class="seg" role="group" aria-label="View options">
+    <button id="bh" class="on"><svg class="ic"><use href="#i-h"/></svg>Hydrogens</button>
+    <button id="bl"><svg class="ic"><use href="#i-tag"/></svg>Labels</button>
+    <button id="bspin"><svg class="ic"><use href="#i-spin"/></svg>Spin</button>
+    <button id="bsurf"><svg class="ic"><use href="#i-surf"/></svg>Surface</button>
+    <button id="brs"><svg class="ic"><use href="#i-reset"/></svg>Reset view</button>
+   </div>
+  </div>
+ </section>
+
+ <section class="card" id="elcard" style="display:none"><h2><svg class="ic"><use href="#i-table"/></svg>Periodic table element</h2><table id="eltab"></table></section>
+
+ <div class="grid2">
+  <section class="card" id="identity">
+   <h2><svg class="ic"><use href="#i-card"/></svg>Molecular identity card</h2>
+   <table id="ids"></table>
+   <img id="img" alt="2D structure" style="display:none">
+   <div id="csout"></div>
+   <div class="ext">
+    <a id="lpc" target="_blank" rel="noopener">Open in PubChem<svg class="ic"><use href="#i-ext"/></svg></a>
+    <a id="lcs" target="_blank" rel="noopener">Open in ChemSpider<svg class="ic"><use href="#i-ext"/></svg></a>
+   </div>
+  </section>
+  <section class="card" id="properties"><h2><svg class="ic"><use href="#i-flask"/></svg>Chemical properties</h2><table id="props"></table></section>
+ </div>
+
+ <div id="analysis">
+  <div id="extra" style="display:none">
+   <section class="card"><h2><svg class="ic"><use href="#i-text"/></svg>Molecular description</h2><p id="desc"></p></section>
+   <div class="grid2">
+    <section class="card"><h2><svg class="ic"><use href="#i-chart"/></svg>Property analysis</h2><div id="stats"></div></section>
+    <section class="card"><h2><svg class="ic"><use href="#i-flask"/></svg>Experimental properties</h2><table id="exp"></table></section>
+   </div>
+  </div>
+  <section class="card ghost"><svg class="ic"><use href="#i-text"/></svg><p>The description, property analysis and experimental values load from PubChem. Search for a compound by name, symbol or CAS number to see them here.</p></section>
+ </div>
+
+</main>
+</div>
+
+<!-- ===== Footer ===== -->
+<footer class="foot">
+ <div class="foot-in">
+  <div class="foot-brand">
+   <svg class="ic" aria-hidden="true"><use href="#i-atom"/></svg>
+   <div><b>CHEMISTRY MOLECULAR LABORATORY</b><p>Live search uses PubChem’s public API (and ChemSpider’s API if you add a key). It needs internet and works when this file is opened from your device or a hosted site.</p></div>
+  </div>
+  <div class="foot-student">
+   <small>Student</small>
+   <div class="name">VIGNESH.N.S.</div>
+   <div class="reg">RE2611026050290</div>
+  </div>
+ </div>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
+<script>
+const DB=[["Ethanol","CCO","64-17-5"],["Benzene","c1ccccc1","71-43-2"],["Phenol","Oc1ccccc1","108-95-2"],["Acetic acid","CC(=O)O","64-19-7"],["Aspirin","CC(=O)Oc1ccccc1C(=O)O","50-78-2"],["Caffeine","CN1C=NC2=C1C(=O)N(C(=O)N2C)C","58-08-2"],["Paracetamol","CC(=O)Nc1ccc(O)cc1","103-90-2"],["Acetone","CC(C)=O","67-64-1"],["Glycine","NCC(=O)O","56-40-6"],["Toluene","Cc1ccccc1","108-88-3"],["Acetylene","C#C","74-86-2"],["Methane","C","74-82-8"],["Formaldehyde","C=O","50-00-0"],["Pyridine","c1ccncc1","110-86-1"]];
+const VAL={C:4,N:3,O:2,S:2,P:3,F:1,Cl:1,Br:1,I:1,B:3,H:1},RAD={H:.31,C:.76,N:.71,O:.66,S:1.05,P:1.07,F:.57,Cl:1.02,Br:1.2,I:1.39,B:.85},MASS={H:1.008,C:12.011,N:14.007,O:15.999,S:32.06,P:30.974,F:18.998,Cl:35.45,Br:79.904,I:126.904,B:10.81};
+function parse(s){
+ const A=[],B=[],st=[],rg={};let p=-1,ord=0,i=0;
+ const bond=(a,b,o)=>{o=o||((A[a].ar&&A[b].ar)?1.5:1);B.push([a,b,o])};
+ const add=(sym,ar,h)=>{A.push({s:sym,ar,h});const k=A.length-1;if(p>=0)bond(p,k,ord);p=k;ord=0};
+ while(i<s.length){const c=s[i];
+  if(c=='('){st.push(p)}else if(c==')'){p=st.pop()}
+  else if(c=='-')ord=1;else if(c=='=')ord=2;else if(c=='#')ord=3;else if(c==':')ord=1.5;
+  else if(/\d/.test(c)){if(rg[c]!==undefined){bond(p,rg[c],ord);delete rg[c];ord=0}else rg[c]=p}
+  else if(c=='['){const e=s.indexOf(']',i);const m=s.slice(i+1,e).match(/^\d*([A-Z][a-z]?|[a-z]{1,2})@*(H\d?)?/);if(!m)throw 0;
+   const ar=m[1]===m[1].toLowerCase();const sym=m[1][0].toUpperCase()+m[1].slice(1);const h=m[2]?(m[2].length>1?+m[2][1]:1):0;add(sym,ar,h);i=e}
+  else if(s.substr(i,2)=='Cl'||s.substr(i,2)=='Br'){add(s.substr(i,2),false,null);i++}
+  else if('BCNOPSFI'.includes(c))add(c,false,null);
+  else if('cnops'.includes(c))add(c.toUpperCase(),true,null);
+  else if(c=='/'||c=='\\'||c=='@'||c=='+'){}else throw 0;
+  i++}
+ if(!A.length||st.length||Object.keys(rg).length)throw 0;
+ const n=A.length,sum=Array(n).fill(0);B.forEach(([a,b,o])=>{sum[a]+=o;sum[b]+=o});
+ for(let k=0;k<n;k++){const v=VAL[A[k].s];if(!v)throw 0;let h=A[k].h;if(h===null)h=Math.max(0,Math.round(v-sum[k]-.01));for(let j=0;j<h;j++){A.push({s:"H",ar:false});B.push([k,A.length-1,1])}}
+ return{A,B}}
+function embed(M){
+ const{A,B}=M,n=A.length,nb=A.map(()=>[]),bd={},rest=[],key=(a,b)=>a<b?a+"_"+b:b+"_"+a;
+ B.forEach(([a,b,o])=>{const d=RAD[A[a].s]+RAD[A[b].s]-(o-1)*.2;bd[key(a,b)]=d;nb[a].push([b,o]);nb[b].push([a,o]);rest.push([a,b,d])});
+ const fixed=new Set(Object.keys(bd));
+ nb.forEach((L,c)=>{if(L.length<2)return;const trip=L.some(x=>x[1]==3),sp2=A[c].ar||L.some(x=>x[1]>1);
+  const deg=trip?180:(sp2?120:109.5),cs=Math.cos(deg*Math.PI/180);
+  for(let x=0;x<L.length;x++)for(let y=x+1;y<L.length;y++){const a=L[x][0],b=L[y][0],d1=bd[key(a,c)],d2=bd[key(b,c)];
+   rest.push([a,b,Math.sqrt(d1*d1+d2*d2-2*d1*d2*cs)]);fixed.add(key(a,b))}});
+ const P=A.map(()=>[0,1,2].map(()=>(Math.random()-.5)*Math.cbrt(n)*2));
+ for(let it=0;it<500;it++){const F=P.map(()=>[0,0,0]);
+  rest.forEach(([a,b,d])=>{const v=[0,1,2].map(k=>P[b][k]-P[a][k]),l=Math.hypot(...v)||.01,f=(l-d)/l*.25;for(let k=0;k<3;k++){F[a][k]+=v[k]*f;F[b][k]-=v[k]*f}});
+  for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){if(fixed.has(key(a,b)))continue;const v=[0,1,2].map(k=>P[b][k]-P[a][k]),l=Math.hypot(...v)||.01;
+   if(l<2.7){const f=(2.7-l)/l*.08;for(let k=0;k<3;k++){F[a][k]-=v[k]*f;F[b][k]+=v[k]*f}}}
+  for(let a=0;a<n;a++)for(let k=0;k<3;k++)P[a][k]+=F[a][k]}
+ const c=[0,1,2].map(k=>P.reduce((s,p)=>s+p[k],0)/n);return P.map(p=>p.map((x,k)=>x-c[k]))}
+function molblock(M,P){const f=x=>x.toFixed(4).padStart(10);
+ let t="mol\n  Gotham\n\n"+String(M.A.length).padStart(3)+String(M.B.length).padStart(3)+"  0  0  0  0  0  0  0  0999 V2000\n";
+ M.A.forEach((a,i)=>t+=f(P[i][0])+f(P[i][1])+f(P[i][2])+" "+a.s.padEnd(3)+" 0  0  0  0  0  0  0  0  0  0  0  0\n");
+ M.B.forEach(([a,b,o])=>t+=String(a+1).padStart(3)+String(b+1).padStart(3)+String(o==1.5?4:o).padStart(3)+"  0\n");return t+"M  END\n"}
+function props(M,smi){
+ const cnt={};M.A.forEach(a=>cnt[a.s]=(cnt[a.s]||0)+1);
+ const order=["C","H",...Object.keys(cnt).filter(x=>x!="C"&&x!="H").sort()];
+ const formula=order.filter(x=>cnt[x]).map(x=>x+(cnt[x]>1?cnt[x]:"")).join("");
+ const mw=M.A.reduce((s,a)=>s+MASS[a.s],0);
+ const hv=M.A.filter(a=>a.s!="H").length;
+ const nH=(i)=>M.B.filter(([a,b])=>(a==i&&M.A[b].s=="H")||(b==i&&M.A[a].s=="H")).length;
+ let hbd=0,hba=0;M.A.forEach((a,i)=>{if(a.s=="N"||a.s=="O"){hba++;if(nH(i))hbd++}});
+ const pi=M.B.reduce((s,[a,b,o])=>s+(o-1),0);const sig=M.B.length;
+ return{formula,mw,hv,all:M.A.length,hbd,hba,sig,pi,rings:M.B.length-(hv-1),rows:[["Molecular formula",formula],["Molecular weight",mw.toFixed(2)+" g/mol"],["Total atoms (with H)",M.A.length],["Heavy atoms",hv],["Sigma (σ) bonds",sig],["Pi (π) bonds",pi],["Total bonds (σ + π)",sig+pi],["H-bond donors",hbd],["H-bond acceptors (N+O)",hba],["Ring count",Math.max(0,M.B.filter(b=>M.A[b[0]].s!="H"&&M.A[b[1]].s!="H").length-(hv-1))]]}}
+let V,sty="bs",showH=true,lab=false,spin=false,surf=false,cur=null,curName="";
+const $=id=>document.getElementById(id);
+function draw(){if(!cur)return;V.removeAllSurfaces();V.removeAllLabels();
+ const S={bs:{stick:{radius:.14},sphere:{scale:.28}},st:{stick:{radius:.2}},sp:{sphere:{scale:1}},ln:{line:{linewidth:2}}}[sty];
+ V.setStyle({},S);if(!showH)V.setStyle({elem:"H"},{});
+ if(lab)cur.M.A.forEach((a,i)=>{if(a.s!="H")V.addLabel(a.s,{position:{x:cur.P[i][0],y:cur.P[i][1],z:cur.P[i][2]},fontSize:13,fontColor:"#00E5FF",backgroundOpacity:.8,backgroundColor:"#3B0A6B"})});
+ if(surf)V.addSurface($3Dmol.SurfaceType.VDW,{opacity:.55,color:"#00E5FF"});
+ V.render()}
+function analyze(smi,name){
+ $("err").textContent="";$("img").style.display="none";$("csout").textContent="";$("elcard").style.display="none";$("extra").style.display="none";let M;
+ try{M=parse(smi.trim())}catch(e){$("err").textContent="Could not read that SMILES. Check brackets, rings and element symbols.";return}
+ const P=embed(M),pr=props(M,smi);cur={M,P};curName=name||smi;
+ V.clear();V.addModel(molblock(M,P),"sdf");V.zoomTo();draw();
+ const cas=(DB.find(d=>d[1]==smi.trim())||[])[2]||"—";
+ $("ids").innerHTML=[["Name",name||"Custom molecule"],["Formula",pr.formula],["SMILES",smi.trim()],["CAS number",cas],["Mol. weight",pr.mw.toFixed(2)]].map(r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td></tr>").join("");
+ $("props").innerHTML=pr.rows.map(r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td></tr>").join("");
+ const term=encodeURIComponent(name||smi.trim());
+ $("lpc").href="https://pubchem.ncbi.nlm.nih.gov/#query="+term;$("lcs").href="https://www.chemspider.com/Search.aspx?q="+term}
+const PUG="https://pubchem.ncbi.nlm.nih.gov/rest/pug/";let ELS=null;
+const jg=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("HTTP "+r.status);return r};
+function fs(o){if(!o||typeof o!="object")return null;if(typeof o.String=="string")return o.String;for(const k in o){const r=fs(o[k]);if(r)return r}return null}
+async function elements(){if(ELS)return ELS;const j=await(await jg(PUG+"periodictable/JSON")).json(),c=j.Table.Columns.Column;ELS=j.Table.Row.map(r=>{const o={};r.Cell.forEach((v,i)=>o[c[i]]=v);return o});return ELS}
+function showEl(e){$("eltab").innerHTML=[["Name",e.Name+" ("+e.Symbol+")"],["CPK color",'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;background:#'+e.CPKHexColor+'"></span> #'+e.CPKHexColor],["Atomic number",e.AtomicNumber],["Protons / electrons",e.AtomicNumber],["Neutrons (approx.)",Math.round(+e.AtomicMass)-e.AtomicNumber],["Atomic mass",e.AtomicMass],["Group block",e.GroupBlock],["Standard state",e.StandardState],["Electron configuration",e.ElectronConfiguration],["Electronegativity",e.Electronegativity],["Atomic radius (pm)",e.AtomicRadius],["Ionization energy (eV)",e.IonizationEnergy],["Electron affinity (eV)",e.ElectronAffinity],["Oxidation states",e.OxidationStates],["Melting point (K)",e.MeltingPoint],["Boiling point (K)",e.BoilingPoint],["Density (g/cm³)",e.Density],["Year discovered",e.YearDiscovered]].filter(r=>r[1]!==undefined&&r[1]!=="").map(r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td></tr>").join("");$("elcard").style.display="block"}
+function sdfModel(t){const L=t.split("\n"),na=+L[3].substr(0,3),nb=+L[3].substr(3,3),A=[],B=[],P=[];
+ for(let i=0;i<na;i++){const l=L[4+i];P.push([+l.substr(0,10),+l.substr(10,10),+l.substr(20,10)]);A.push({s:l.substr(31,3).trim()})}
+ for(let i=0;i<nb;i++){const l=L[4+na+i],o=+l.substr(6,3);B.push([+l.substr(0,3)-1,+l.substr(3,3)-1,o==4?1.5:o])}
+ return{M:{A,B},P}}
+async function compound(q){
+ const p=(await(await jg(PUG+"compound/name/"+encodeURIComponent(q)+"/property/Title,IUPACName,MolecularFormula,MolecularWeight,ExactMass,CanonicalSMILES,XLogP,TPSA,HBondDonorCount,HBondAcceptorCount,RotatableBondCount,HeavyAtomCount,Charge,Complexity,AtomStereoCount,BondStereoCount,CovalentUnitCount,Volume3D,InChIKey/JSON")).json()).PropertyTable.Properties[0];
+ let sdf,is3d=false;for(const t of["3d","2d"]){try{sdf=await(await jg(PUG+"compound/cid/"+p.CID+"/SDF?record_type="+t)).text();is3d=t=="3d";break}catch(e){}}
+ let cas="—",syn=[];try{const s=(await(await jg(PUG+"compound/cid/"+p.CID+"/synonyms/JSON")).json()).InformationList.Information[0].Synonym;syn=s.slice(0,6);cas=s.find(x=>/^\d{2,7}-\d\d-\d$/.test(x))||"—"}catch(e){}
+ let desc="";try{const I=(await(await jg(PUG+"compound/cid/"+p.CID+"/description/JSON")).json()).InformationList.Information;desc=(I.find(x=>x.Description)||{}).Description||""}catch(e){}
+ const exp={};await Promise.all(["Melting Point","Boiling Point","Density","Solubility","Flash Point","Vapor Pressure"].map(async h=>{try{const j=await(await jg(PUG.replace("/pug/","/pug_view/")+"data/compound/"+p.CID+"/JSON?heading="+encodeURIComponent(h))).json();const t=fs(j.Record.Section);if(t)exp[h]=t.slice(0,160)}catch(e){}}));
+ return{p,sdf,is3d,cas,syn,desc,exp}}
+function render({p,sdf,is3d,cas,syn,desc,exp},q){
+ const smi=p.ConnectivitySMILES||p.CanonicalSMILES||p.SMILES||"";
+ let{M,P}=sdfModel(sdf),mb=sdf;
+ if(!is3d){try{const m=parse(smi),e=embed(m);M=m;P=e;mb=molblock(m,e)}catch(x){}}
+ cur={M,P};curName=p.Title||q;V.clear();V.addModel(mb,"sdf");V.zoomTo();draw();$("smi").value=smi;
+ const row=r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td></tr>",v=x=>x===undefined?"—":x;
+ $("ids").innerHTML=[["Name",curName],["IUPAC name",v(p.IUPACName)],["Formula",p.MolecularFormula],["SMILES",smi],["InChIKey",v(p.InChIKey)],["CAS number",cas],["PubChem CID",p.CID],["Synonyms",syn.join(", ")||"—"]].map(row).join("");
+ $("img").src=PUG+"compound/cid/"+p.CID+"/PNG?image_size=300x300";$("img").style.display="block";
+ const sg=M.B.length,pi=M.B.reduce((s,b)=>s+b[2]-1,0);
+ $("props").innerHTML=[["Molecular weight",p.MolecularWeight+" g/mol"],["XLogP",v(p.XLogP)],["TPSA (Å²)",v(p.TPSA)],["H-bond donors",v(p.HBondDonorCount)],["H-bond acceptors",v(p.HBondAcceptorCount)],["Rotatable bonds",v(p.RotatableBondCount)],["Total atoms (with H)",M.A.length],["Sigma (σ) bonds",sg],["Pi (π) bonds",pi],["Total bonds (σ + π)",sg+pi],["Exact mass",v(p.ExactMass)],["Heavy atoms",v(p.HeavyAtomCount)],["Formal charge",v(p.Charge)],["Complexity",v(p.Complexity)],["Stereo atoms",v(p.AtomStereoCount)],["Stereo bonds",v(p.BondStereoCount)],["Covalent units",v(p.CovalentUnitCount)],["3D volume (Å³)",v(p.Volume3D)]].map(row).join("");
+ $("lpc").href="https://pubchem.ncbi.nlm.nih.gov/compound/"+p.CID;$("lcs").href="https://www.chemspider.com/Search.aspx?q="+encodeURIComponent(curName);
+ const num=x=>+x||0,cl=x=>Math.max(0,Math.min(1,x));
+ const vio=(num(p.MolecularWeight)>500)+(num(p.XLogP)>5)+(num(p.HBondDonorCount)>5)+(num(p.HBondAcceptorCount)>10);
+ $("props").insertAdjacentHTML("beforeend",row(["Lipinski rule of five",vio?vio+" violation(s)":"Pass (0 violations)"]));
+ {const t={};let tot=0,ok=true;M.A.forEach(a=>{if(!MASS[a.s])ok=false;else{t[a.s]=(t[a.s]||0)+MASS[a.s];tot+=MASS[a.s]}});if(ok)$("props").insertAdjacentHTML("beforeend",row(["Composition by mass",Object.keys(t).map(k=>k+" "+(t[k]/tot*100).toFixed(1)+"%").join(", ")]))}
+ $("stats").innerHTML=[["Mass",num(p.MolecularWeight)/500],["Lipophilicity (XLogP)",(num(p.XLogP)+3)/8],["Polarity (TPSA)",num(p.TPSA)/140],["Donors",num(p.HBondDonorCount)/5],["Acceptors",num(p.HBondAcceptorCount)/10],["Complexity",num(p.Complexity)/600]].map(z=>'<div class="bar"><b>'+z[0]+'</b><i><u style="width:'+Math.round(cl(z[1])*100)+'%"></u></i></div>').join("");
+ $("desc").textContent=desc||"No description available on PubChem.";
+ const ek=Object.keys(exp);$("exp").innerHTML=ek.length?ek.map(k=>row([k,exp[k]])).join(""):row(["—","No experimental values found on PubChem."]);
+ $("extra").style.display="block";renderList()}
+async function chemspider(name){const k=$("key").value.trim(),o=$("csout");
+ if(!k){o.textContent="ChemSpider: add a free API key (developer.rsc.org) in the left panel to pull its record here. The link above still works.";return}
+ o.textContent="Asking ChemSpider…";
+ try{const H={apikey:k,"Content-Type":"application/json"},U="https://api.rsc.org/compounds/v1/";
+  const a=await(await jg2(U+"filter/name",{method:"POST",headers:H,body:JSON.stringify({name})})).json();let r;
+  for(let i=0;i<8;i++){r=await(await jg2(U+"filter/"+a.queryId+"/results",{headers:H})).json();if(r.results)break;await new Promise(z=>setTimeout(z,700))}
+  const id=r.results[0],d=await(await jg2(U+"records/"+id+"/details?fields=CommonName,Formula,MolecularWeight",{headers:H})).json();
+  o.innerHTML="ChemSpider ID <b>"+id+"</b> · "+d.commonName+" · "+String(d.formula).replace(/[_{}]/g,"")+' · <a href="https://www.chemspider.com/Chemical-Structure.'+id+'.html" target="_blank" rel="noopener">open record ↗</a>';
+  try{localStorage.setItem("csk",k)}catch(e){}
+ }catch(e){o.textContent="ChemSpider did not answer. Check the API key; the RSC server may also block calls made from a browser."}}
+const jg2=async(u,o)=>{const r=await fetch(u,o);if(!r.ok)throw new Error("HTTP "+r.status);return r};
+async function live(q){if(!q)return;$("st").textContent="Searching PubChem…";$("err").textContent="";$("elcard").style.display="none";$("extra").style.display="none";
+ const[el,cp]=await Promise.allSettled([elements().then(L=>L.find(e=>e.Name.toLowerCase()==q.toLowerCase()||e.Symbol.toLowerCase()==q.toLowerCase())),compound(q)]);
+ const net=[el,cp].some(r=>r.status=="rejected"&&r.reason instanceof TypeError),e=el.status=="fulfilled"?el.value:null;
+ if(e)showEl(e);
+ if(!e&&cp.status!="fulfilled"){$("st").textContent="";$("err").textContent=net?"Can’t reach PubChem. Live search needs internet and works from the downloaded file or a hosted copy, not inside the claude.ai preview.":"Nothing found for “"+q+"”. Try another name, symbol or CAS number.";return}
+ $("st").textContent=(e?"Element found. ":"")+(cp.status=="fulfilled"?"Compound found on PubChem.":"No compound record with that name.");
+ if(cp.status=="fulfilled"){render(cp.value,q);chemspider(cp.value.p.Title||q)}}
+function renderList(){const q=$("q").value.toLowerCase();
+ $("list").innerHTML="";DB.filter(d=>(d[0]+d[2]).toLowerCase().includes(q)||props(parse(d[1])).formula.toLowerCase().includes(q)).forEach(d=>{
+  const e=document.createElement("div");e.className="item"+(d[0]==curName?" sel":"");e.innerHTML="<b>"+d[0]+"</b><span>"+d[2]+"</span>";
+  e.onclick=()=>{$("smi").value=d[1];analyze(d[1],d[0]);renderList()};$("list").appendChild(e)})}
+function init(){
+ V=$3Dmol.createViewer($("v"),{backgroundColor:"#050505"});
+ $("q").oninput=renderList;$("go").onclick=()=>live($("q").value.trim());$("q").onkeydown=e=>{if(e.key=="Enter")$("go").click()};try{$("key").value=localStorage.getItem("csk")||""}catch(e){}
+ $("run").onclick=()=>{curName="";analyze($("smi").value);renderList()};
+ $("smi").onkeydown=e=>{if(e.key=="Enter")$("run").click()};
+ document.querySelectorAll("#styles button").forEach(b=>b.onclick=()=>{sty=b.dataset.s;document.querySelectorAll("#styles button").forEach(x=>x.classList.toggle("on",x==b));draw()});
+ const tg=(id,fn)=>{$(id).onclick=()=>{const on=fn();$(id).classList.toggle("on",on);draw()}};
+ tg("bh",()=>showH=!showH);tg("bl",()=>lab=!lab);tg("bsurf",()=>surf=!surf);
+ $("bspin").onclick=()=>{spin=!spin;V.spin(spin);$("bspin").classList.toggle("on",spin)};
+ $("brs").onclick=()=>{V.zoomTo();V.render()};
+ curName="Ethanol";renderList();analyze("CCO","Ethanol")}
+window.addEventListener("load",()=>{try{init()}catch(e){$("err").textContent="3D viewer failed to load."}});
+</script>
+<script>
+/* ===== Interface enhancements (read-only observers; the chemistry code above is untouched) ===== */
+(function(){
+ const $=id=>document.getElementById(id);
+ const hdr=document.querySelector(".nav");
+
+ /* header height drives sticky offsets */
+ const setH=()=>document.documentElement.style.setProperty("--nav-h",hdr.offsetHeight+"px");
+ setH();if(window.ResizeObserver)new ResizeObserver(setH).observe(hdr);
+
+ /* active navigation indicator */
+ const secs=["lab","identity","properties","analysis"].map($),links=[...document.querySelectorAll("#nav a")];
+ function spy(){
+  const y=window.scrollY+hdr.offsetHeight+window.innerHeight*.25;let cur=secs[0];
+  secs.forEach(s=>{if(s.offsetParent!==null&&s.getBoundingClientRect().top+window.scrollY<=y)cur=s});
+  if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-6)cur=[...secs].reverse().find(s=>s.offsetParent!==null&&s.getBoundingClientRect().height>0)||cur;
+  links.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+cur.id))}
+ addEventListener("scroll",spy,{passive:true});addEventListener("resize",spy);spy();
+
+ /* loading animations follow the existing status text */
+ const stage=$("stage");
+ function busy(){
+  const s=/^Searching/.test($("st").textContent);
+  stage.classList.toggle("busy",s);$("go").classList.toggle("loading",s);
+  $("csout").classList.toggle("loading",/^Asking/.test($("csout").textContent))}
+ const mo=(el,fn)=>new MutationObserver(fn).observe(el,{childList:true,characterData:true,subtree:true});
+ mo($("st"),busy);mo($("csout"),busy);
+
+ /* viewer caption mirrors the identity card */
+ mo($("ids"),()=>{
+  const rows=[...document.querySelectorAll("#ids tr")].map(r=>[r.cells[0].textContent,r.cells[1].textContent]);
+  const get=k=>(rows.find(r=>r[0]===k)||[])[1]||"";
+  $("hudName").textContent=get("Name")||"Molecule";
+  const f=$("hudFormula");f.textContent="";
+  get("Formula").split(/(\d+)/).forEach((t,i)=>{if(!t)return;if(i%2){const s=document.createElement("sub");s.textContent=t;f.appendChild(s)}else f.appendChild(document.createTextNode(t))})});
+
+ /* errors are also shown as a toast so they are visible from anywhere on the page */
+ let tt;mo($("err"),()=>{const m=$("err").textContent.trim();if(!m)return;const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),6500)});
+
+ /* keyboard access for the compound list */
+ const list=$("list");
+ mo(list,()=>list.querySelectorAll(".item").forEach(i=>{i.tabIndex=0;i.setAttribute("role","option")}));
+ list.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("item")){e.preventDefault();e.target.click()}});
+
+ /* library count */
+ try{$("count").textContent=DB.length}catch(e){}
+
+ /* keep the WebGL canvas sized to its container */
+ const fit=()=>{try{V.resize();V.render()}catch(e){}};
+ addEventListener("resize",fit);if(window.ResizeObserver)new ResizeObserver(fit).observe($("v"));
+})();
+</script>
+</body></html>
